@@ -118,6 +118,21 @@ module.exports = function(grunt) {
 					dest: '<%= globalConfig.images %>'
 				}]
 			}
+		},
+
+		// https://github.com/sindresorhus/grunt-shell
+		shell: {
+			workflow: {
+				command: [
+					'cd ..',
+					'git pull',
+					//'cd dev/',								// nur in verbindung mit vagrant
+					//'vagrant up',								// nur in verbindung mit vagrant
+					//'open http://grunt-webseite.local',		// nur in verbindung mit vagrant
+					'cd ../resources/',
+					'grunt'
+				].join('&&')
+			}
 		}
 	});
 
@@ -130,4 +145,5 @@ module.exports = function(grunt) {
 	// Ausführen über $ grunt watch
 	grunt.registerTask('default', ['watch']);
 	grunt.registerTask('optimize-images', ['responsive_images', 'imagemin']);
+	grunt.registerTask('start-workflow', ['shell:workflow']);
 };
