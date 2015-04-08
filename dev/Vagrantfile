@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'rbconfig'
+include RbConfig
+
+Vagrant.configure("2") do |config|
+
+	config.vm.box = "lamp55"
+
+	case CONFIG['host_os']
+		when /mswin|windows/i
+			# Windows
+			config.vm.synced_folder "../" , "/project", :mount_options => ['dmode=777', 'fmode=777']
+
+		when /linux/i
+			# Linux
+			config.vm.synced_folder "../" , "/project", :nfs => true
+
+		when /darwin/i
+			# Mac
+			config.vm.synced_folder "../" , "/project", :nfs => true
+
+		else
+			# Whatever
+			config.vm.synced_folder "../" , "/project", :mount_options => ['dmode=777', 'fmode=777']
+	end
+
+
+	config.hostmanager.enabled = true
+	config.hostmanager.manage_host = true
+	config.vm.define 'grunt-webseite' do |node|
+		node.vm.hostname = 'grunt-webseite.dev'
+		node.vm.network :private_network, ip: '192.168.59.10'
+		node.hostmanager.aliases = %w(www.grunt-webseite.dev)
+	end
+	config.vm.provision :hostmanager
+	config.vm.network :forwarded_port, guest: 80, host: 8080
+
+	config.vm.provider :virtualbox do |vb|
+		vb.customize ["modifyvm", :id, "--memory", "512"]
+	end
+
+	config.vm.provision :shell, :path => "vagrantprovisioning/bootstrap.sh"
+end
